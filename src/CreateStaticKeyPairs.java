@@ -69,6 +69,10 @@ public class CreateStaticKeyPairs {
             PrivateKey privateKeyCA = (PrivateKey) keyStore.getKey("LoyaltyCardProvider", "LCP".toCharArray());
             java.security.cert.Certificate certCA = (java.security.cert.Certificate) keyStore.getCertificate("LoyaltyCardProvider");
             PublicKey publicKeyCA = (PublicKey) certCA.getPublicKey();
+            System.out.print("Public key CA: ");
+            for (byte b: publicKeyCA.getEncoded()) {
+                System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
+            }
 
             // Genereer certificaat voor javacard
             BigInteger serial = BigInteger.valueOf(new Random().nextInt());

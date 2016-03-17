@@ -1,12 +1,16 @@
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import javax.crypto.KeyAgreement;
+import java.io.*;
 import java.net.Socket;
+import java.security.*;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 
 
 public class IOThread extends Thread {
@@ -74,21 +78,59 @@ public class IOThread extends Thread {
 
     private void setupSecureConnection(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
 
-
+        // genereer nieuw EC keypair
         CreateStaticKeyPairs.KeyObject keyObject = CreateStaticKeyPairs.createStaticKeyPairs();
         ecPublicKey = (ECPublicKey)keyObject.publicKey;
         ecPrivateKey = (ECPrivateKey)keyObject.privateKey;
         certificate = keyObject.certificate;
-
 
         try {
             out.writeObject(certificate.getEncoded());
         } catch (CertificateEncodingException e) {
             e.printStackTrace();
         }
-        byte[] publicKeyOtherParty = (byte[]) in.readObject();
+
+        // Lees certificaat van andere partij in, check of juist en lees public key
+        byte[] certificateOtherPartyByteArray = (byte[]) in.readObject();
+        X509Certificate certificateOtherParty = null;
+        try {
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            InputStream byteInputStream = new ByteArrayInputStream(certificateOtherPartyByteArray);
+            X509Certificate certicateOtherParty = (X509Certificate)certFactory.generateCertificate(byteInputStream);
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
+        PublicKey publicKeyOtherParty = certificateOtherParty.getPublicKey();
+        byte[] sessionKeyByteArray = generateSessionKey(publicKeyOtherParty.getEncoded());
+
+
 
     }
 
+    private byte[] generateSessionKey(byte[] pubKeyOtherPartyBytes) {
+        try {
+            PublicKey pubKeyOtherParty = KeyFactory.getInstance("ECDH", "BC")
+                .generatePublic(new X509EncodedKeySpec(pubKeyOtherPartyBytes));
+            KeyAgreement keyAgr;
+            keyAgr = KeyAgreement.getInstance("ECDH", "BC");
+            keyAgr.init(ecPrivateKey);
+
+
+            keyAgr.doPhase(pubKeyOtherParty, true);
+
+            MessageDigest hash = MessageDigest.getInstance("SHA1");
+            byte[] sessionKey = hash.digest(keyAgr.generateSecret());
+            System.out.print("Hashed secret key:\t");
+            for (byte b: sessionKey) {
+                System.out.print("0x" + String.format("%02x", b) + " ");
+            }
+
+            return sessionKey;
+            }
+        catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | NoSuchProviderException e) {
+            e.printStackTrace();
+        }
+return null;
+}
 
 }

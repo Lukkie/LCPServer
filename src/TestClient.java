@@ -32,6 +32,10 @@ public class TestClient {
                 System.out.print("0x" + String.format("%02x", b) + " ");
             }
 
+
+            out.writeObject(input); // Dummy: Zend zelfde public key terug
+            Thread.sleep(1000L);
+
             System.out.println("\nEnding client");
 	        } catch (UnknownHostException e) {
 	            System.err.println("Don't know about host " + hostName);
@@ -41,6 +45,8 @@ public class TestClient {
 	                hostName);
 	            System.exit(1);
 	        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 

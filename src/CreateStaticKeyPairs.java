@@ -31,6 +31,11 @@ public class CreateStaticKeyPairs {
     private static KeyStore keyStore = null;
 
     public static void main(String[] args) {
+        createStaticKeyPairs();
+    }
+
+    public static KeyObject createStaticKeyPairs() {
+        KeyObject keyObject = new KeyObject();
         Security.addProvider(new BouncyCastleProvider());
         try {
             KeyPair kp = generateECCKeyPair();
@@ -38,21 +43,21 @@ public class CreateStaticKeyPairs {
             ecPublicKey = (ECPublicKey)kp.getPublic();
             printSecret(ecPrivateKey);
             printPublic(ecPublicKey);
+            keyObject.publicKey = ecPublicKey;
+            keyObject.privateKey = ecPrivateKey;
 
-            generateCertificateForCard(ecPublicKey);
-            //byte[] output = kp.getPublic().getEncoded();
-            //out.writeObject(output);
-            //byte[] pubKeyOtherPartyBytes = (byte[])in.readObject();
-
-            //sharedKey = generateSessionKey(pubKeyOtherPartyBytes);
-
+            keyObject.certificate = generateCertificateForCard(ecPublicKey);
+            return keyObject;
         }
         catch (NoSuchProviderException e) {
             System.out.println("Error: No such provider");
         }
+        return null;
     }
 
-    private static void generateCertificateForCard(ECPublicKey ecPublicKey) {
+
+
+    private static X509Certificate generateCertificateForCard(ECPublicKey ecPublicKey) {
         try {
             // Open keystore and retreive private key
             keyStore = KeyStore.getInstance("JKS");
@@ -83,11 +88,13 @@ public class CreateStaticKeyPairs {
                 System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
             }
             System.out.println();
+            return cert;
 
 
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException | UnrecoverableKeyException | SignatureException | NoSuchProviderException | InvalidKeyException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     private static X509Certificate signCertificate(X509v1CertificateBuilder v1CertGen, PrivateKey privateKey) {
@@ -127,6 +134,12 @@ public class CreateStaticKeyPairs {
             System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
         }
         System.out.println();
+    }
+
+    public static class KeyObject {
+        public PublicKey publicKey = null;
+        public PrivateKey privateKey = null;
+        public X509Certificate certificate = null;
     }
 //
 //private static byte[] generateSessionKey(byte[] pubKeyOtherPartyBytes) {

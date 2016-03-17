@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 
 public class IOThread extends Thread {
@@ -15,6 +17,7 @@ public class IOThread extends Thread {
     private ECPrivateKey ecPrivateKey;
     private ECPublicKey ecPublicKey;
     private byte[] sharedKey;
+    private X509Certificate certificate;
 
     public IOThread(Socket socket) {
         super("IOThread");
@@ -70,11 +73,20 @@ public class IOThread extends Thread {
 	}
 
     private void setupSecureConnection(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
+
+
+        CreateStaticKeyPairs.KeyObject keyObject = CreateStaticKeyPairs.createStaticKeyPairs();
+        ecPublicKey = (ECPublicKey)keyObject.publicKey;
+        ecPrivateKey = (ECPrivateKey)keyObject.privateKey;
+        certificate = keyObject.certificate;
+
+
+        try {
+            out.writeObject(certificate.getEncoded());
+        } catch (CertificateEncodingException e) {
+            e.printStackTrace();
+        }
         byte[] publicKeyOtherParty = (byte[]) in.readObject();
-        out.writeObject(ecPublicKey.getEncoded());
-
-
-
 
     }
 

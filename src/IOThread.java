@@ -96,7 +96,7 @@ public class IOThread extends Thread {
         try {
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             InputStream byteInputStream = new ByteArrayInputStream(certificateOtherPartyByteArray);
-            X509Certificate certicateOtherParty = (X509Certificate)certFactory.generateCertificate(byteInputStream);
+            certificateOtherParty = (X509Certificate)certFactory.generateCertificate(byteInputStream);
         } catch (CertificateException e) {
             e.printStackTrace();
         }

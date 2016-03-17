@@ -25,10 +25,7 @@ public class TestClient {
             System.out.println("Wrote to server");
 
 
-            //int length = (Integer)in.readObject();
-            //System.out.println("Received length: "+length);
-            //byte[] input = new byte[length];
-            //in.readFully(input);
+
             byte[] input = (byte[])in.readObject();
             System.out.println("Received bytes");
             for (byte b: input) {

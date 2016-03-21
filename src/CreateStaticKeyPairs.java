@@ -8,14 +8,13 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import sun.security.ec.ECPublicKeyImpl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
+import java.security.cert.Certificate;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Date;
 import java.util.Random;
@@ -59,7 +58,7 @@ public class CreateStaticKeyPairs {
 
     private static X509Certificate generateCertificateForCard(ECPublicKey ecPublicKey) {
         try {
-            // Open keystore and retreive private key
+            // Open keystore and retrieve private key
             keyStore = KeyStore.getInstance("JKS");
             String fileNameStore1 = new File("certificates\\LCP.jks").getAbsolutePath();
             char[] password = "LCP".toCharArray();
@@ -67,9 +66,9 @@ public class CreateStaticKeyPairs {
             keyStore.load(fis, password);
             fis.close();
             PrivateKey privateKeyCA = (PrivateKey) keyStore.getKey("LoyaltyCardProvider", "LCP".toCharArray());
-            java.security.cert.Certificate certCA = (java.security.cert.Certificate) keyStore.getCertificate("LoyaltyCardProvider");
-            PublicKey publicKeyCA = (PublicKey) certCA.getPublicKey();
-            System.out.print("Public key CA: ");
+            Certificate certCA =  keyStore.getCertificate("LoyaltyCardProvider");
+            PublicKey publicKeyCA = certCA.getPublicKey();
+            System.out.print("Public key CA (length: "+publicKeyCA.getEncoded().length+" byte): ");
             for (byte b: publicKeyCA.getEncoded()) {
                 System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
             }
@@ -87,11 +86,33 @@ public class CreateStaticKeyPairs {
             cert.verify(publicKeyCA);
 
             byte[] certificateBytes = cert.getEncoded();
-            System.out.print("Certificate: ");
+            System.out.print("\nCertificate (length: "+certificateBytes.length+" byte): ");
             for (byte b: certificateBytes) {
                 System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
             }
             System.out.println();
+
+/*
+            X509Certificate doorgestuurdCertificate = null;
+            try {
+                CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+                InputStream byteInputStream = new ByteArrayInputStream(certificateBytes);
+                doorgestuurdCertificate = (X509Certificate)certFactory.generateCertificate(byteInputStream);
+            }catch(CertificateException e) {
+                e.printStackTrace();
+            }
+            System.out.println("\n\nCert public key:");
+            PublicKey pkDoorgestuurd = doorgestuurdCertificate.getPublicKey();
+            ECPublicKeyImpl epckDoorgestuurd = (ECPublicKeyImpl)pkDoorgestuurd;
+            byte[] epckBytes = epckDoorgestuurd.getEncodedPublicValue();
+            System.out.println("W (Public Key) (length: "+ epckBytes.length+" byte): "+ new BigInteger(1, epckBytes).toString(16));
+            */
+
+
+
+
+
+
             return cert;
 
 
@@ -123,8 +144,8 @@ public class CreateStaticKeyPairs {
     }
 
     public static void printSecret(ECPrivateKey key){
-        System.out.println("S (Private Key): "+ new BigInteger(1, key.getD().toByteArray()).toString(16));
-        byte[] privateKey = key.getEncoded();
+        byte[] privateKey = key.getD().toByteArray();
+        System.out.println("S (Private Key) (length: "+ privateKey.length+" byte): "+ new BigInteger(1, key.getD().toByteArray()).toString(16));
         for (byte b: privateKey) {
             System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
         }
@@ -132,8 +153,8 @@ public class CreateStaticKeyPairs {
     }
 
     public static void printPublic(ECPublicKey key){
-        System.out.println("W (Public Key): "+ new BigInteger(1, key.getQ().getEncoded()).toString(16));
-        byte[] publicKey = key.getEncoded();
+        byte[] publicKey = key.getQ().getEncoded();
+        System.out.println("W (Public Key) (length: "+ publicKey.length+" byte): "+ new BigInteger(1, key.getQ().getEncoded()).toString(16));
         for (byte b: publicKey) {
             System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
         }

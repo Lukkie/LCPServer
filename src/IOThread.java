@@ -1,8 +1,10 @@
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
+import sun.security.ec.ECPublicKeyImpl;
 
 import javax.crypto.KeyAgreement;
 import java.io.*;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
@@ -20,14 +22,14 @@ public class IOThread extends Thread {
 
     private ECPrivateKey ecPrivateKey;
     private ECPublicKey ecPublicKey;
-    private byte[] sharedKey;
+    private byte[] sessionKey;
     private X509Certificate certificate;
 
     public IOThread(Socket socket) {
         super("IOThread");
         System.out.println("IOThread started");
         this.socket = socket;
-        sharedKey = null;
+        sessionKey = null;
     }
 	
     
@@ -101,7 +103,12 @@ public class IOThread extends Thread {
             e.printStackTrace();
         }
         PublicKey publicKeyOtherParty = certificateOtherParty.getPublicKey();
-        byte[] sessionKeyByteArray = generateSessionKey(publicKeyOtherParty.getEncoded());
+        ECPublicKeyImpl ecPublicKeyOtherParty = (ECPublicKeyImpl)publicKeyOtherParty;
+        byte[] ecPublicKeyOtherPartyBytes = ecPublicKeyOtherParty.getEncodedPublicValue();
+        sessionKey = generateSessionKey(ecPublicKeyOtherPartyBytes);
+        System.out.println("Received W (Public Key other party) (length: "+
+                ecPublicKeyOtherPartyBytes.length+" byte): "+
+                new BigInteger(1, ecPublicKeyOtherPartyBytes).toString(16));
 
 
 

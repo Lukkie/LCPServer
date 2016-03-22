@@ -1,8 +1,12 @@
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Date;
 
 
 public class TestClient {
@@ -10,16 +14,12 @@ public class TestClient {
 	public static void main(String[] args) {
 		String hostName = "localhost";
 		int portNumber = 15151;
-		
 
-		
 		try (
             Socket socket = new Socket(hostName, portNumber);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
         ) {
-
-
             System.out.println("Trying to write to server");
             out.writeObject("SetupSecureConnection");
             System.out.println("Wrote to server");

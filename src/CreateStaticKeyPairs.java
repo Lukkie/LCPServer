@@ -77,7 +77,7 @@ public class CreateStaticKeyPairs {
             BigInteger serial = BigInteger.valueOf(new Random().nextInt());
             long notUntil = System.currentTimeMillis()+1000L*60*60*24*100;
             X509v1CertificateBuilder v1CertGen = new JcaX509v1CertificateBuilder(new X500Name("CN=www.LCP.be, O=KULeuven, L=Gent, ST=O-Vl, C=BE"),
-                    serial , new Date(System.currentTimeMillis()), new Date(notUntil), new X500Name("CN=www.Javacard.be, O=KULeuven, L=Gent, ST=O-Vl, C=BE"), ecPublicKey);
+                    serial , new Date(System.currentTimeMillis()), new Date(notUntil), new X500Name("CN=www.LCP.be, O=KULeuven, L=Gent, ST=O-Vl, C=BE"), ecPublicKey);
             //X509CertificateHolder holder = v1CertGen.build(signer);
             X509Certificate cert = signCertificate(v1CertGen, privateKeyCA);
             if (cert != null) {

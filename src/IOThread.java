@@ -81,16 +81,14 @@ public class IOThread extends Thread {
     private void setupSecureConnection(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
 
         // genereer nieuw EC keypair
-        CreateStaticKeyPairs.KeyObject keyObject = CreateStaticKeyPairs.createStaticKeyPairs();
+        // Niet nodig
+        /*CreateStaticKeyPairs.KeyObject keyObject = CreateStaticKeyPairs.createStaticKeyPairs();
         ecPublicKey = (ECPublicKey)keyObject.publicKey;
         ecPrivateKey = (ECPrivateKey)keyObject.privateKey;
-        certificate = keyObject.certificate;
+        certificate = keyObject.certificate;*/
 
-        try {
-            out.writeObject(certificate.getEncoded());
-        } catch (CertificateEncodingException e) {
-            e.printStackTrace();
-        }
+        out.writeObject(Tools.ECCertificate);
+
 
         // Lees certificaat van andere partij in, check of juist en lees public key
         byte[] certificateOtherPartyByteArray = (byte[]) in.readObject();

@@ -1,7 +1,6 @@
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -9,15 +8,13 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.Random;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 
 /**
  * Created by Lukas on 24-Mar-16.
@@ -35,6 +32,16 @@ public class Tools {
             System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
         }
     }
+
+    public static org.bouncycastle.jce.interfaces.ECPublicKey getECPublicKey() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
+        return (org.bouncycastle.jce.interfaces.ECPublicKey) KeyFactory.getInstance("ECDH", "BC").generatePublic(new X509EncodedKeySpec(ECPublicKey));
+    }
+
+    public static org.bouncycastle.jce.interfaces.ECPrivateKey getECPrivateKey() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
+        return (org.bouncycastle.jce.interfaces.ECPrivateKey) KeyFactory.getInstance("ECDH", "BC").generatePrivate(new X509EncodedKeySpec(ECPrivateKey));
+
+    }
+
 
     public static PublicKey getPublicKey() {
         try {

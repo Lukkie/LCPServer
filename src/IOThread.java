@@ -117,11 +117,10 @@ public class IOThread extends Thread {
                 .generatePublic(new X509EncodedKeySpec(pubKeyOtherPartyBytes));
             KeyAgreement keyAgr;
             keyAgr = KeyAgreement.getInstance("ECDH", "BC");
-            keyAgr.init(ecPrivateKey);
+            keyAgr.init(Tools.getECPrivateKey());
 
 
             keyAgr.doPhase(pubKeyOtherParty, true);
-
             MessageDigest hash = MessageDigest.getInstance("SHA1");
             byte[] sessionKey = hash.digest(keyAgr.generateSecret());
             System.out.print("Hashed secret key:\t");

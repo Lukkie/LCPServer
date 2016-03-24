@@ -1,5 +1,6 @@
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import sun.security.ec.ECPublicKeyImpl;
 
 import javax.crypto.KeyAgreement;
@@ -30,6 +31,7 @@ public class IOThread extends Thread {
         System.out.println("IOThread started");
         this.socket = socket;
         sessionKey = null;
+        Security.addProvider(new BouncyCastleProvider());
     }
 	
     

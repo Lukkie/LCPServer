@@ -1,25 +1,34 @@
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.*;
 
 /**
  * Created by Lukas on 24-Mar-16.
  */
 public class Tools {
+
+    private static final ECNamedCurveParameterSpec ECCparam = ECNamedCurveTable.getParameterSpec("prime192v1");
+    private static final ECGenParameterSpec ecParamSpec = new ECGenParameterSpec("prime192v1");
 
     public static byte[] ECPublicKey = {(byte) 0x04, (byte) 0xc7, (byte) 0x99, (byte) 0xc8, (byte) 0x9f, (byte) 0x44, (byte) 0x78, (byte) 0xff, (byte) 0x74, (byte) 0xa7, (byte) 0x87, (byte) 0xed, (byte) 0xd0, (byte) 0x58, (byte) 0x37, (byte) 0x1e, (byte) 0x94, (byte) 0x67, (byte) 0xe0, (byte) 0x13, (byte) 0x9f, (byte) 0x96, (byte) 0xf3, (byte) 0x47, (byte) 0x57, (byte) 0x04, (byte) 0x1f, (byte) 0x0d, (byte) 0x25, (byte) 0x03, (byte) 0x3a, (byte) 0xdb, (byte) 0x27, (byte) 0x5e, (byte) 0xf0, (byte) 0x4a, (byte) 0x6f, (byte) 0x5f, (byte) 0xeb, (byte) 0x3b, (byte) 0x7a, (byte) 0x66, (byte) 0xb8, (byte) 0x35, (byte) 0xd8, (byte) 0x51, (byte) 0x64, (byte) 0x43, (byte) 0x28};
     public static byte[] ECPrivateKey = {(byte) 0x72, (byte) 0x77, (byte) 0xfd, (byte) 0x50, (byte) 0x10, (byte) 0xee, (byte) 0x7e, (byte) 0xa2, (byte) 0xba, (byte) 0x1b, (byte) 0x19, (byte) 0xdc, (byte) 0xeb, (byte) 0x75, (byte) 0x7b, (byte) 0x35, (byte) 0xd2, (byte) 0x94, (byte) 0xa4, (byte) 0xb5, (byte) 0xf3, (byte) 0x9c, (byte) 0x41, (byte) 0xf1};
@@ -38,8 +47,30 @@ public class Tools {
     }
 
     public static org.bouncycastle.jce.interfaces.ECPrivateKey getECPrivateKey() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
-        return (org.bouncycastle.jce.interfaces.ECPrivateKey) KeyFactory.getInstance("ECDH", "BC").generatePrivate(new X509EncodedKeySpec(ECPrivateKey));
 
+        BigInteger D = new BigInteger(ECPrivateKey);
+
+        KeySpec keyspec = new ECPrivateKeySpec(D,(ECParameterSpec)ECCparam);
+
+        PrivateKey privkey = null;
+
+        try{
+            privkey = KeyFactory.getInstance("ECDH", "BC").generatePrivate(keyspec);
+            org.bouncycastle.jce.interfaces.ECPrivateKey ecPk = (org.bouncycastle.jce.interfaces.ECPrivateKey)privkey;
+
+            return ecPk;
+
+        }catch( Throwable e ){
+
+            e.printStackTrace();
+        }
+        return null;
+        /*//PKCS8EncodedKeySpec formatted_private = new PKCS8EncodedKeySpec(ECPrivateKey);
+        ECPrivateKeySpec formatted_private = new ECPrivateKeySpec(ECPrivateKey);
+        KeyFactory kf = KeyFactory.getInstance("ECDH", "BC");
+        PrivateKey pk = kf.generatePrivate(formatted_private);
+        org.bouncycastle.jce.interfaces.ECPrivateKey ecPk = (org.bouncycastle.jce.interfaces.ECPrivateKey)pk;
+        return ecPk;*/
     }
 
 

@@ -10,8 +10,6 @@ public class Main {
      * @param args
      */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
 		int portNumber = 15151;
         IOThread ioThread = null;
 		try (ServerSocket serverSocket = new ServerSocket(portNumber)) { 
@@ -24,8 +22,5 @@ public class Main {
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
         }
-		
-
 	}
-
 }

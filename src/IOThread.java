@@ -101,12 +101,11 @@ public class IOThread extends Thread {
             e.printStackTrace();
         }
         PublicKey publicKeyOtherParty = certificateOtherParty.getPublicKey();
-        ECPublicKeyImpl ecPublicKeyOtherParty = (ECPublicKeyImpl)publicKeyOtherParty;
-        byte[] ecPublicKeyOtherPartyBytes = ecPublicKeyOtherParty.getEncodedPublicValue();
-        sessionKey = generateSessionKey(ecPublicKeyOtherPartyBytes);
-        System.out.println("Received W (Public Key other party) (length: "+
+
+        sessionKey = generateSessionKey(publicKeyOtherParty.getEncoded());
+        /*System.out.println("Received W (Public Key other party) (length: "+
                 ecPublicKeyOtherPartyBytes.length+" byte): "+
-                new BigInteger(1, ecPublicKeyOtherPartyBytes).toString(16));
+                new BigInteger(1, ecPublicKeyOtherPartyBytes).toString(16));*/
 
 
 

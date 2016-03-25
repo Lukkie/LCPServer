@@ -1,17 +1,13 @@
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import sun.security.ec.ECPublicKeyImpl;
 
-import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.math.BigInteger;
 import java.net.Socket;
 import java.security.*;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -136,7 +132,7 @@ public class IOThread extends Thread {
 
 
 
-        secretKey = new SecretKeySpec(sessionKey, 0, sessionKey.length, Crypto.SYMMETRIC_ALGORITHM);
+        secretKey = new SecretKeySpec(sessionKey, 0, sessionKey.length, "AES");
         System.out.print("SecretKey: ");
         Tools.printByteArray(secretKey.getEncoded());
 

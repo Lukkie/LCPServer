@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="bcmail-jdk16-146">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Desktop/nodige files/bcmail-jdk16-146.jar!/" />
+      <root url="jar://$USER_HOME$/Desktop/nodige files/bcprov-jdk16-146.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

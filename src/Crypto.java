@@ -14,7 +14,7 @@ public class Crypto {
     public static final String ASYMMETRIC_ALGORITHM = "RSA";
     //public static final String SYMMETRIC_ALGORITHM = "AES/CBC/PKCS5Padding";
     //public static final String SYMMETRIC_ALGORITHM = "AES/CBC/NoPadding";
-    public static final String SYMMETRIC_ALGORITHM = "AES";
+    public static final String SYMMETRIC_ALGORITHM = "AES/CBC/NoPadding";
 
 
 
@@ -35,7 +35,7 @@ public class Crypto {
 
     public static SecretKey generateSymmetricKey() {
         try {
-            KeyGenerator keyGen = KeyGenerator.getInstance(SYMMETRIC_ALGORITHM);
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
             return keyGen.generateKey();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

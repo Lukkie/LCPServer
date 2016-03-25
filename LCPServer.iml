@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
   <component name="EclipseModuleManager">
-    <libelement value="jar://$MODULE_DIR$/../../Bijlagen/bcmail-jdk16-146.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/../../Bijlagen/bcprov-jdk16-146.jar!/" />
+    <libelement value="jar://$USER_HOME$/Bijlagen/bcmail-jdk16-146.jar!/" />
+    <libelement value="jar://$USER_HOME$/Bijlagen/bcprov-jdk16-146.jar!/" />
     <src_description expected_position="0">
       <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
     </src_description>
@@ -18,7 +18,7 @@
     <orderEntry type="module-library" exported="">
       <library name="bcmail-jdk16-146.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Bijlagen/bcmail-jdk16-146.jar!/" />
+          <root url="jar://$USER_HOME$/Bijlagen/bcmail-jdk16-146.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -27,11 +27,12 @@
     <orderEntry type="module-library" exported="">
       <library name="bcprov-jdk16-146.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../Bijlagen/bcprov-jdk16-146.jar!/" />
+          <root url="jar://$USER_HOME$/Bijlagen/bcprov-jdk16-146.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="bcmail-jdk16-146" level="project" />
   </component>
 </module>

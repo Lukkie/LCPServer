@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 
@@ -41,13 +42,10 @@ public class TestClient {
             SecretKey secretKey = (SecretKey)in.readObject();
             String shopName = "Kaasfabriek";
 
-            byte[] shopNameBytes = shopName.getBytes();
+            byte[] shopNameBytes  = shopName.getBytes(StandardCharsets.UTF_8);
             System.out.println("Length: "+shopNameBytes.length);
-            byte[] message = new byte[16];
-            for (int i = 0; i < message.length; i++) {
-               if (i < shopNameBytes.length)  message[i] = shopNameBytes[i];
-                else message[i] = new Byte("0");
-            }
+            byte[] message = new byte[128];
+            System.arraycopy(shopNameBytes,0,message,0,message.length);
             byte[] encryptedShopName = Tools.encryptMessage(message, secretKey);
             out.writeObject("RequestRegistration");
             out.writeObject(encryptedShopName);

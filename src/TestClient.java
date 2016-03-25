@@ -1,6 +1,7 @@
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -34,7 +35,26 @@ public class TestClient {
 
 
             out.writeObject(input); // Dummy: Zend zelfde public key terug
-            Thread.sleep(1000L);
+            Thread.sleep(500L);
+
+            out.writeObject("getSessionKey");
+            SecretKey secretKey = (SecretKey)in.readObject();
+            String shopName = "Kaasfabriek";
+
+            byte[] shopNameBytes = shopName.getBytes();
+            System.out.println("Length: "+shopNameBytes.length);
+            byte[] message = new byte[16];
+            for (int i = 0; i < message.length; i++) {
+               if (i < shopNameBytes.length)  message[i] = shopNameBytes[i];
+                else message[i] = new Byte("0");
+            }
+            byte[] encryptedShopName = Tools.encryptMessage(message, secretKey);
+            out.writeObject("RequestRegistration");
+            out.writeObject(encryptedShopName);
+
+
+
+
 
             System.out.println("\nEnding client");
 	        } catch (UnknownHostException e) {

@@ -3,7 +3,10 @@ import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import sun.security.ec.ECPublicKeyImpl;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.Socket;
@@ -14,6 +17,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 
 public class IOThread extends Thread {
@@ -24,6 +28,7 @@ public class IOThread extends Thread {
     private ECPrivateKey ecPrivateKey;
     private ECPublicKey ecPublicKey;
     private byte[] sessionKey;
+    private SecretKey secretKey = null;
     private X509Certificate certificate;
 
     public IOThread(Socket socket) {
@@ -32,6 +37,7 @@ public class IOThread extends Thread {
         this.socket = socket;
         sessionKey = null;
         Security.addProvider(new BouncyCastleProvider());
+
     }
 	
     
@@ -67,6 +73,19 @@ public class IOThread extends Thread {
                     setupSecureConnection(in, out);
                     break;
                 }
+                case "RequestRegistration": {
+                    requestRegistration(in, out);
+                    break;
+                }
+
+
+
+                //Test cases
+                case "getSessionKey": {
+                    out.writeObject(secretKey);
+                    break;
+                }
+
 
                 default: {
                     System.out.println("Request not recognized. Stopping connection ");
@@ -79,6 +98,12 @@ public class IOThread extends Thread {
         return true;
 		
 	}
+
+    private void requestRegistration(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
+        byte[] encryptedShopname = (byte[])in.readObject();
+        String shopName = Tools.decryptMessage(encryptedShopname, secretKey);
+        System.out.println("\nShopname: "+shopName);
+    }
 
     private void setupSecureConnection(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
 
@@ -111,6 +136,11 @@ public class IOThread extends Thread {
 
 
 
+        secretKey = new SecretKeySpec(sessionKey, 0, sessionKey.length, Crypto.SYMMETRIC_ALGORITHM);
+        System.out.print("SecretKey: ");
+        Tools.printByteArray(secretKey.getEncoded());
+
+
     }
 
     private byte[] generateSessionKey(byte[] pubKeyOtherPartyBytes) {
@@ -123,12 +153,15 @@ public class IOThread extends Thread {
 
 
             keyAgr.doPhase(pubKeyOtherParty, true);
-            MessageDigest hash = MessageDigest.getInstance("SHA1");
-            byte[] sessionKey = hash.digest(keyAgr.generateSecret());
-            System.out.print("Hashed secret key:\t");
-            for (byte b: sessionKey) {
-                System.out.print("0x" + String.format("%02x", b) + " ");
-            }
+            MessageDigest hash = MessageDigest.getInstance("SHA-1");
+            byte[] secret = keyAgr.generateSecret();
+            System.out.print("Secret key (length: "+secret.length+"):\t");
+            Tools.printByteArray(secret);
+            System.out.println();
+            byte[] sessionKey = hash.digest(secret);
+            sessionKey = Arrays.copyOf(sessionKey, 16);
+            System.out.print("Hashed secret key (length: "+sessionKey.length+"):\t");
+            Tools.printByteArray(sessionKey);
 
             return sessionKey;
             }

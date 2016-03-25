@@ -12,9 +12,13 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -36,11 +40,6 @@ public class Tools {
 
     public static X500Name x500Name = new X500Name("CN=www.LCP.be, O=KULeuven, L=Gent, ST=O-Vl, C=BE");
 
-    public static void printBytes(byte[] byteArray) {
-        for (byte b : byteArray) {
-            System.out.print("(byte) 0x" + String.format("%02x", b) + ", ");
-        }
-    }
 
     public static org.bouncycastle.jce.interfaces.ECPublicKey getECPublicKey() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
         return (org.bouncycastle.jce.interfaces.ECPublicKey) KeyFactory.getInstance("ECDH", "BC").generatePublic(new X509EncodedKeySpec(ECPublicKey));
@@ -131,5 +130,42 @@ public class Tools {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static byte[] encryptMessage(byte[] msg, SecretKey sessionKey) {
+        try {
+            Cipher c = Cipher.getInstance(Crypto.SYMMETRIC_ALGORITHM);
+            //content
+            byte[] encryptedContent = Crypto.encrypt(msg, sessionKey, c);
+            return encryptedContent;
+
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    public static String decryptMessage(byte[] msg, SecretKey secretKey) {
+        try {
+            Cipher c = Cipher.getInstance(Crypto.SYMMETRIC_ALGORITHM);
+            //content
+            byte[] decryptedContent = Crypto.decrypt(msg, secretKey, c);
+            return new String(decryptedContent, "UTF-8");
+
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void printByteArray(byte[] bytes) {
+        for (byte b: bytes) {
+            System.out.print("0x" + String.format("%02x", b) + " ");
+        }
+        System.out.println();
+
     }
 }

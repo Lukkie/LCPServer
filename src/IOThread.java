@@ -38,8 +38,7 @@ public class IOThread extends Thread {
 	
     
     @Override
-    public void run() {     	
-    	
+    public void run() {
     	try {
     		in = new ObjectInputStream(this.socket.getInputStream());
 			out = new ObjectOutputStream(this.socket.getOutputStream());

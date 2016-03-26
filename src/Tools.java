@@ -40,6 +40,8 @@ public class Tools {
 
     public static X500Name x500Name = new X500Name("CN=www.LCP.be, O=KULeuven, L=Gent, ST=O-Vl, C=BE");
 
+    private static SecureRandom rand = new SecureRandom();
+
 
     public static org.bouncycastle.jce.interfaces.ECPublicKey getECPublicKey() throws NoSuchProviderException, NoSuchAlgorithmException, InvalidKeySpecException {
         return (org.bouncycastle.jce.interfaces.ECPublicKey) KeyFactory.getInstance("ECDH", "BC").generatePublic(new X509EncodedKeySpec(ECPublicKey));
@@ -161,11 +163,46 @@ public class Tools {
         return null;
     }
 
+    public static byte[] decrypt(byte[] msg, SecretKey secretKey) {
+        try {
+            Cipher c = Cipher.getInstance(Crypto.SYMMETRIC_ALGORITHM);
+            //content
+            byte[] decryptedContent = Crypto.decrypt(msg, secretKey, c);
+            return decryptedContent;
+
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static void printByteArray(byte[] bytes) {
         for (byte b: bytes) {
             System.out.print("0x" + String.format("%02x", b) + " ");
         }
         System.out.println();
+    }
 
+    public static byte[] applyPadding(byte[] bytes) {
+        int length = bytes.length;
+        int newLength = length + 16 - (length%16);
+        byte[] padded = new byte[newLength];
+        for (int i = 0; i < newLength; i++) {
+            if (i < length) padded[i] = bytes[i];
+            else padded[i] = new Byte("0");
+        }
+        return padded;
+    }
+
+    /**
+     *
+     * @return 26 bytes random pseudo ID
+     */
+    public static String generateRandomPseudoniem() {
+        String s = new BigInteger(130, rand).toString(32);
+        while (s.length() < 26) {
+            s = "0"+s;
+        }
+        return s;
     }
 }

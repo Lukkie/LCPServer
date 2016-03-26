@@ -10,6 +10,7 @@ public class Main {
      * @param args
      */
 	public static void main(String[] args) {
+        Databank.getInstance();
 		int portNumber = 15151;
         IOThread ioThread = null;
 		try (ServerSocket serverSocket = new ServerSocket(portNumber)) { 

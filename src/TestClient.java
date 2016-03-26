@@ -37,21 +37,25 @@ public class TestClient {
 
             out.writeObject("getSessionKey");
             SecretKey secretKey = (SecretKey)in.readObject();
-            String shopName = "Kaasfabriek";
+            String shopName = "Aldi";
 
             byte[] shopNameBytes  = shopName.getBytes(StandardCharsets.UTF_8);
             System.out.println("Length: "+shopNameBytes.length);
-            byte[] message = new byte[128];
-            for (int i = 0; i < message.length; i++) {
-                if (i < shopNameBytes.length) message[i] = shopNameBytes[i];
-                else message[i] = new Byte("0");
-            }
+//            byte[] message = new byte[128];
+//            for (int i = 0; i < message.length; i++) {
+//                if (i < shopNameBytes.length) message[i] = shopNameBytes[i];
+//                else message[i] = new Byte("0");
+//            }
+            byte[] message = Tools.applyPadding(shopNameBytes);
             byte[] encryptedShopName = Tools.encryptMessage(message, secretKey);
             out.writeObject("RequestRegistration");
             out.writeObject(encryptedShopName);
 
+            String pseudo = Tools.decryptMessage((byte[])in.readObject(), secretKey);
+            System.out.println("Received pseudo: " + pseudo);
 
-
+            byte[] pseudoCertificateBytes = Tools.decrypt((byte[])in.readObject(), secretKey);
+            System.out.println("Certificate size: "+pseudoCertificateBytes.length);
 
 
             System.out.println("\nEnding client");

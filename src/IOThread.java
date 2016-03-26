@@ -1,3 +1,6 @@
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.cert.X509v1CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
 import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -6,14 +9,13 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.security.cert.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
+import java.util.*;
 
 
 public class IOThread extends Thread {
@@ -96,8 +98,64 @@ public class IOThread extends Thread {
 
     private void requestRegistration(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
         byte[] encryptedShopname = (byte[])in.readObject();
-        String shopName = Tools.decryptMessage(encryptedShopname, secretKey);
+        byte[] decryptedShopname = Tools.decrypt(encryptedShopname, secretKey);
+        String shopName = "";
+        for (int j = 0; j < decryptedShopname.length; j++) {
+            if (decryptedShopname[j] != (byte)0x00) shopName += (char)decryptedShopname[j];
+            else break;
+        }
         System.out.println("\nShopname: "+shopName);
+        //BigInteger pseudoniem = new BigInteger(128, rand);
+        String pseudoString = Tools.generateRandomPseudoniem();
+        //byte[] pseudoByteArray = pseudoniem.toByteArray();
+        //String pseudoString = new String(pseudoByteArray);
+        System.out.println("Generated pseudo: "+pseudoString+" (length: "+pseudoString.length()+")");
+        System.out.println("Pseudo byte array length: "+pseudoString.getBytes().length);
+        Databank.getInstance().addUser(shopName, pseudoString);
+        byte[] pseudo = Tools.encryptMessage(Tools.applyPadding(pseudoString.getBytes()), secretKey);
+        out.writeObject(pseudo);
+        try {
+            X509Certificate pseudoCertificate = generatePseudoCertificate(pseudoString);
+            byte[] encryptedCertificate = Tools.encryptMessage(Tools.applyPadding(pseudoCertificate.getEncoded()), secretKey);
+            out.writeObject(encryptedCertificate);
+            System.out.println("Certificate size: "+pseudoCertificate.getEncoded().length);
+            System.out.println("Encrypted certificate size: "+encryptedCertificate.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private X509Certificate generatePseudoCertificate(String pseudoString) throws
+            KeyStoreException, IOException, CertificateException,
+            NoSuchAlgorithmException, UnrecoverableKeyException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        System.out.println("PseudoString size: "+pseudoString.length());
+
+        // Open keystore and retrieve private key
+        KeyStore keyStore = KeyStore.getInstance("JKS");
+        String fileNameStore1 = new File("certificates\\LCP.jks").getAbsolutePath();
+        char[] password = "LCP".toCharArray();
+        FileInputStream fis = new FileInputStream(fileNameStore1);
+        keyStore.load(fis, password);
+        fis.close();
+        PrivateKey privateKeyCA = (PrivateKey) keyStore.getKey("LoyaltyCardProvider", "LCP".toCharArray());
+        java.security.cert.Certificate certCA =  keyStore.getCertificate("LoyaltyCardProvider");
+        PublicKey publicKeyCA = certCA.getPublicKey();
+
+        // Genereer certificaat voor javacard
+        BigInteger serial = BigInteger.valueOf(new Random().nextInt());
+        long notUntil = System.currentTimeMillis()+1000L*60*60*24*100;
+        X509v1CertificateBuilder v1CertGen = new JcaX509v1CertificateBuilder(Tools.x500Name,
+                serial , new Date(System.currentTimeMillis()), new Date(notUntil), new X500Name("CN="+pseudoString+", O=KULeuven, L=Gent, ST=O-Vl, C=BE"), publicKeyCA);
+        X509Certificate cert = Tools.signCertificate(v1CertGen, privateKeyCA);
+        if (cert != null) {
+            cert.checkValidity(new Date());
+        }
+        cert.verify(publicKeyCA);
+
+        byte[] certificateBytes = cert.getEncoded();
+        System.out.println("\nCertificate (length: "+certificateBytes.length+" byte): ");
+
+        return cert;
     }
 
     private void setupSecureConnection(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {

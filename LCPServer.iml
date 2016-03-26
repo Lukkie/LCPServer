@@ -16,23 +16,22 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="module-library" exported="">
-      <library name="bcmail-jdk16-146.jar">
+      <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Bijlagen/bcmail-jdk16-146.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/bcmail-jdk16-146.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
-      <library name="bcprov-jdk16-146.jar">
+      <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Bijlagen/bcprov-jdk16-146.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/bcprov-jdk16-146.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="bcmail-jdk16-146" level="project" />
   </component>
 </module>

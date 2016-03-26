@@ -1,6 +1,3 @@
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -45,7 +42,10 @@ public class TestClient {
             byte[] shopNameBytes  = shopName.getBytes(StandardCharsets.UTF_8);
             System.out.println("Length: "+shopNameBytes.length);
             byte[] message = new byte[128];
-            System.arraycopy(shopNameBytes,0,message,0,message.length);
+            for (int i = 0; i < message.length; i++) {
+                if (i < shopNameBytes.length) message[i] = shopNameBytes[i];
+                else message[i] = new Byte("0");
+            }
             byte[] encryptedShopName = Tools.encryptMessage(message, secretKey);
             out.writeObject("RequestRegistration");
             out.writeObject(encryptedShopName);

@@ -48,11 +48,19 @@ public class Crypto {
 
     public static byte[] encrypt(byte[] encryptMe, Key key, Cipher c) {
         try {
-            /*byte[] ivdata = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            byte[] ivdata = new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec spec = new IvParameterSpec(ivdata);
-            c.init(ENCRYPT_MODE, key, spec);*/
-            c.init(ENCRYPT_MODE, key);
-            return c.doFinal(encryptMe);
+
+            //System.out.print("Before encrypting: ");
+            //Tools.printByteArray(encryptMe);
+
+            c.init(ENCRYPT_MODE, key, spec);
+            byte[] results = c.doFinal(encryptMe);
+
+            //System.out.print("After encrypting: ");
+            //Tools.printByteArray(results);
+
+            return results;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,8 +73,16 @@ public class Crypto {
             IvParameterSpec spec = new IvParameterSpec(ivdata);
 
             byte[] d = decryptMe;
+            //System.out.print("Before decrypting: ");
+            //Tools.printByteArray(d);
+
             c.init(Cipher.DECRYPT_MODE, key, spec);
-            return c.doFinal(d);
+            byte[] results = c.doFinal(d);
+
+            //System.out.print("After decrypting: ");
+            //Tools.printByteArray(results);
+
+            return results;
         } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }

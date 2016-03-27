@@ -97,6 +97,14 @@ public class IOThread extends Thread {
 	}
 
     private void requestRegistration(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
+
+        // serial number inlezen
+        byte[] encrpytedSerialNumber = (byte[])in.readObject();
+        final int serialNumberLength = 6;
+        String serialNumberString = Tools.decryptMessage(encrpytedSerialNumber, secretKey);
+        serialNumberString = serialNumberString.substring(0, serialNumberLength);
+
+        // shopname inlezen
         byte[] encryptedShopname = (byte[])in.readObject();
         byte[] decryptedShopname = Tools.decrypt(encryptedShopname, secretKey);
         String shopName = "";
@@ -105,27 +113,28 @@ public class IOThread extends Thread {
             else break;
         }
         System.out.println("\nShopname: "+shopName);
-        //BigInteger pseudoniem = new BigInteger(128, rand);
+
+        // psuedoniem genereren
         String pseudoString = Tools.generateRandomPseudoniem();
-        //byte[] pseudoByteArray = pseudoniem.toByteArray();
-        //String pseudoString = new String(pseudoByteArray);
         System.out.println("Generated pseudo: "+pseudoString+" (length: "+pseudoString.length()+")");
         System.out.println("Pseudo byte array length: "+pseudoString.getBytes().length);
-        Databank.getInstance().addUser(shopName, pseudoString);
+        Databank.getInstance().addUser(shopName, pseudoString, serialNumberString);
         byte[] pseudo = Tools.encryptMessage(Tools.applyPadding(pseudoString.getBytes()), secretKey);
         out.writeObject(pseudo);
+
+        // certificaat genereren
         try {
-            X509Certificate pseudoCertificate = generatePseudoCertificate(pseudoString);
-            byte[] encryptedCertificate = Tools.encryptMessage(Tools.applyPadding(pseudoCertificate.getEncoded()), secretKey);
+            PseudoniemCertificate pseudoCertificate = generatePseudoCertificate(pseudoString);
+            byte[] encryptedCertificate = Tools.encryptMessage(Tools.applyPadding(pseudoCertificate.getBytes()), secretKey);
             out.writeObject(encryptedCertificate);
-            System.out.println("Certificate size: "+pseudoCertificate.getEncoded().length);
+            System.out.println("Certificate size: "+pseudoCertificate.getBytes().length);
             System.out.println("Encrypted certificate size: "+encryptedCertificate.length);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private X509Certificate generatePseudoCertificate(String pseudoString) throws
+    private PseudoniemCertificate generatePseudoCertificate(String pseudoString) throws
             KeyStoreException, IOException, CertificateException,
             NoSuchAlgorithmException, UnrecoverableKeyException, InvalidKeyException, NoSuchProviderException, SignatureException {
         System.out.println("PseudoString size: "+pseudoString.length());
@@ -141,21 +150,20 @@ public class IOThread extends Thread {
         java.security.cert.Certificate certCA =  keyStore.getCertificate("LoyaltyCardProvider");
         PublicKey publicKeyCA = certCA.getPublicKey();
 
-        // Genereer certificaat voor javacard
-        BigInteger serial = BigInteger.valueOf(new Random().nextInt());
-        long notUntil = System.currentTimeMillis()+1000L*60*60*24*100;
-        X509v1CertificateBuilder v1CertGen = new JcaX509v1CertificateBuilder(Tools.x500Name,
-                serial , new Date(System.currentTimeMillis()), new Date(notUntil), new X500Name("CN="+pseudoString+", O=KULeuven, L=Gent, ST=O-Vl, C=BE"), publicKeyCA);
-        X509Certificate cert = Tools.signCertificate(v1CertGen, privateKeyCA);
-        if (cert != null) {
-            cert.checkValidity(new Date());
+        // Generate certificate
+        PseudoniemCertificate cert = new PseudoniemCertificate(pseudoString.getBytes(), System.currentTimeMillis() + 1000L*60*60*24*100);
+        try {
+            cert.sign(privateKeyCA);
+            if (cert.verifySignature(publicKeyCA)) System.out.println("Signature verified");
+            else System.out.println("Signature invalid");
         }
-        cert.verify(publicKeyCA);
-
-        byte[] certificateBytes = cert.getEncoded();
-        System.out.println("\nCertificate (length: "+certificateBytes.length+" byte): ");
-
+        catch(Exception e) {
+            e.printStackTrace();
+        }
         return cert;
+
+
+
     }
 
     private void setupSecureConnection(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {

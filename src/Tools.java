@@ -25,6 +25,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.*;
+import java.util.Arrays;
 
 /**
  * Created by Lukas on 24-Mar-16.
@@ -205,4 +206,31 @@ public class Tools {
         }
         return s;
     }
+
+    public static byte[] concatAllBytes(byte[] first, byte[]... rest) {
+        int totalLength = first.length;
+        for (byte[] array : rest) {
+            totalLength += array.length;
+        }
+        byte[] result = Arrays.copyOf(first, totalLength);
+        int offset = first.length;
+        for (byte[] array : rest) {
+            System.arraycopy(array, 0, result, offset, array.length);
+            offset += array.length;
+        }
+        return result;
+    }
+    public static byte[] increaseSize(byte[] input, int size) {
+        if (input.length >= size) return input;
+
+        byte[] output = new byte[size];
+        for (int i = 0; i < input.length; i++) {
+            output[i] = input[i];
+        }
+        for (int i = input.length; i < size; i++) {
+            output[i] = new Byte("0");
+        }
+        return output;
+    }
+
 }

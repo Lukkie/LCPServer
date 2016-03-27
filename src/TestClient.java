@@ -37,8 +37,10 @@ public class TestClient {
 
             out.writeObject("getSessionKey");
             SecretKey secretKey = (SecretKey)in.readObject();
-            String shopName = "Aldi";
 
+
+            String serialNumber = "192545";
+            String shopName = "Aldi";
             byte[] shopNameBytes  = shopName.getBytes(StandardCharsets.UTF_8);
             System.out.println("Length: "+shopNameBytes.length);
 //            byte[] message = new byte[128];
@@ -49,6 +51,8 @@ public class TestClient {
             byte[] message = Tools.applyPadding(shopNameBytes);
             byte[] encryptedShopName = Tools.encryptMessage(message, secretKey);
             out.writeObject("RequestRegistration");
+            out.writeObject(Tools.encryptMessage(Tools.applyPadding(
+                    serialNumber.getBytes(StandardCharsets.UTF_8)), secretKey));
             out.writeObject(encryptedShopName);
 
             String pseudo = Tools.decryptMessage((byte[])in.readObject(), secretKey);

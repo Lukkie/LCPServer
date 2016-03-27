@@ -119,6 +119,7 @@ public class IOThread extends Thread {
         System.out.println("Pseudo byte array length: "+pseudoString.getBytes().length);
         Databank.getInstance().addUser(shopName, pseudoString, serialNumber);
         byte[] pseudo = Tools.encryptMessage(Tools.applyPadding(pseudoString.getBytes()), secretKey);
+        System.out.println("Encrypted pseudo length: "+pseudo.length);
         out.writeObject(pseudo);
 
         // certificaat genereren

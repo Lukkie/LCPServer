@@ -184,9 +184,13 @@ public class Tools {
         System.out.println();
     }
 
+    /**
+     * Blocks of blockSize bytes
+     */
     public static byte[] applyPadding(byte[] bytes) {
+        final int blockSize = 128;
         int length = bytes.length;
-        int newLength = length + 16 - (length%16);
+        int newLength = length + blockSize - (length%blockSize);
         byte[] padded = new byte[newLength];
         for (int i = 0; i < newLength; i++) {
             if (i < length) padded[i] = bytes[i];

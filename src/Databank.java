@@ -34,7 +34,7 @@ public class Databank {
         }
     }
 
-    public void addUser(String shop, String pseudo, String serialNumber) {
+    public void addUser(String shop, String pseudo, byte[] serialNumber) {
         users.get(shop).add(new User(pseudo, serialNumber));
     }
 }

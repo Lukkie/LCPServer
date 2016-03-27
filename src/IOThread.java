@@ -100,9 +100,8 @@ public class IOThread extends Thread {
 
         // serial number inlezen
         byte[] encrpytedSerialNumber = (byte[])in.readObject();
-        final int serialNumberLength = 6;
-        String serialNumberString = Tools.decryptMessage(encrpytedSerialNumber, secretKey);
-        serialNumberString = serialNumberString.substring(0, serialNumberLength);
+        byte[] serialNumber = Tools.decrypt(encrpytedSerialNumber, secretKey);
+
 
         // shopname inlezen
         byte[] encryptedShopname = (byte[])in.readObject();
@@ -118,7 +117,7 @@ public class IOThread extends Thread {
         String pseudoString = Tools.generateRandomPseudoniem();
         System.out.println("Generated pseudo: "+pseudoString+" (length: "+pseudoString.length()+")");
         System.out.println("Pseudo byte array length: "+pseudoString.getBytes().length);
-        Databank.getInstance().addUser(shopName, pseudoString, serialNumberString);
+        Databank.getInstance().addUser(shopName, pseudoString, serialNumber);
         byte[] pseudo = Tools.encryptMessage(Tools.applyPadding(pseudoString.getBytes()), secretKey);
         out.writeObject(pseudo);
 

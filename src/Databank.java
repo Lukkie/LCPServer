@@ -35,6 +35,10 @@ public class Databank {
     }
 
     public void addUser(String shop, String pseudo, byte[] serialNumber) {
-        users.get(shop).add(new User(pseudo, serialNumber));
+        try {
+            users.get(shop).add(new User(pseudo, serialNumber));
+        } catch(NullPointerException e) {
+            throw new NullPointerException("Shop does not exist. Check config file?");
+        }
     }
 }

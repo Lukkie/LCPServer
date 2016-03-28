@@ -62,7 +62,7 @@ public class TestClient {
             out.writeObject(encryptedShopName);
 
             boolean bestaatAl = (boolean) in.readObject();
-            String pseudo = "GebruikerBestaatAl";
+            String pseudo = "GebruikerBestaatAl12345678";
             if (!bestaatAl) {
                 pseudo = Tools.decryptMessage((byte[]) in.readObject(), secretKey);
                 pseudo = pseudo.substring(0,26);

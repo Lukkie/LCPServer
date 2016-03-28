@@ -259,11 +259,8 @@ public class IOThread extends Thread {
             String pseudo = Tools.byteArrayToString(pseudoBytes);
             short amount = Tools.byteArrayToShort(amountBytes);
             short LP = Tools.byteArrayToShort(LPBytes);
-
-            Tools.printByteArray(amountBytes);
-
-            System.out.printf("Pseudo: %s\tamount: %d\tLP:%d\n",pseudo, amount, LP);
-
+            Databank.getInstance().addLog(pseudo, amount, LP);
+            System.out.printf("Added log: [Pseudo: %s\tamount: %d\tLP:%d]\n",pseudo, amount, LP);
         }
         //byte[] logsByteArray = Tools.decrypt(logsByteArrayEncrypted, secretKey);
 

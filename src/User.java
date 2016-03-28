@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Created by Lukas on 26-Mar-16.
  */
@@ -11,6 +13,7 @@ public class User {
         this.serialNumber = serialNumber;
         points = 0;
     }
+
 
     public void setSerialNumber(byte[] serialNumber) {
         this.serialNumber = serialNumber;

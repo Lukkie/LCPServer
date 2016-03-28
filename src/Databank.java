@@ -8,6 +8,7 @@ import java.util.HashMap;
  */
 public class Databank {
     private HashMap<String, ArrayList<User>> users;
+    private ArrayList<Log> logs;
 
     private static Databank ourInstance = new Databank();
     public static Databank getInstance() {
@@ -16,6 +17,7 @@ public class Databank {
 
     private Databank() {
         users = new HashMap<String, ArrayList<User>>();
+        logs = new ArrayList<Log>();
         File configFile = new File("data\\config.txt");
         try {
             BufferedReader br = new BufferedReader(new FileReader(configFile));
@@ -49,5 +51,9 @@ public class Databank {
 
         }
         return false;
+    }
+
+    public void addLog(String pseudo, short amount, short LP) {
+        logs.add(new Log(pseudo, amount, LP));
     }
 }

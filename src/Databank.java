@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -40,5 +41,13 @@ public class Databank {
         } catch(NullPointerException e) {
             throw new NullPointerException("Shop does not exist. Check config file?");
         }
+    }
+
+    public boolean shopContainsUser(String shop, byte[] serialNumber) {
+        for (User user: users.get(shop)) {
+            if (Arrays.equals(user.getSerialNumber(), serialNumber)) return true;
+
+        }
+        return false;
     }
 }

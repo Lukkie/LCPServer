@@ -70,11 +70,16 @@ public class IOThread extends Thread {
                     setupSecureConnection(in, out);
                     break;
                 }
+
                 case "RequestRegistration": {
                     requestRegistration(in, out);
                     break;
                 }
 
+                case "PushLogs": {
+                    pushLogs(in, out);
+                    break;
+                }
 
 
                 //Test cases
@@ -96,6 +101,7 @@ public class IOThread extends Thread {
 		
 	}
 
+
     private void requestRegistration(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
 
         // serial number inlezen
@@ -112,6 +118,11 @@ public class IOThread extends Thread {
             else break;
         }
         System.out.println("\nShopname: "+shopName);
+
+        // Checken of gebruiker al bestaat, en boolean terugsturen
+        boolean bestaatAl = false;
+        if (Databank.getInstance().shopContainsUser(shopName, serialNumber)) bestaatAl = true;
+        out.writeObject(bestaatAl);
 
         // psuedoniem genereren
         String pseudoString = Tools.generateRandomPseudoniem();
@@ -229,7 +240,33 @@ public class IOThread extends Thread {
         catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | NoSuchProviderException e) {
             e.printStackTrace();
         }
-return null;
-}
+        return null;
+    }
+
+    private void pushLogs(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
+        ArrayList<byte[]> logsByteArrayEncrypted = (ArrayList<byte[]>)in.readObject();
+        //for (int i = 0; i < logsByteArrayEncrypted.length; i+=128) {
+            //byte[] logEncrypted = Arrays.copyOfRange(logsByteArrayEncrypted, i, i+128);
+        for (byte[] logEncrypted: logsByteArrayEncrypted) {
+            byte[] log =  Tools.decrypt(logEncrypted, secretKey); // nog met padding
+
+            byte[] pseudoBytes = Arrays.copyOfRange(log, 0, 26);
+            byte[] amountBytes = Arrays.copyOfRange(log, 26, 28);
+            byte[] LPBytes = Arrays.copyOfRange(log, 28, 30);
+
+            String pseudo = Tools.byteArrayToString(pseudoBytes);
+            short amount = Tools.byteArrayToShort(amountBytes);
+            short LP = Tools.byteArrayToShort(LPBytes);
+
+            Tools.printByteArray(amountBytes);
+
+            System.out.printf("Pseudo: %s\tamount: %d\tLP:%d\n",pseudo, amount, LP);
+
+        }
+        //byte[] logsByteArray = Tools.decrypt(logsByteArrayEncrypted, secretKey);
+
+
+    }
+
 
 }

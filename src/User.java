@@ -11,4 +11,28 @@ public class User {
         this.serialNumber = serialNumber;
         points = 0;
     }
+
+    public void setSerialNumber(byte[] serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    public void setPseudoniem(String pseudoniem) {
+        this.pseudoniem = pseudoniem;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public byte[] getSerialNumber() {
+        return serialNumber;
+    }
+
+    public String getPseudoniem() {
+        return pseudoniem;
+    }
+
+    public int getPoints() {
+        return points;
+    }
 }

@@ -65,6 +65,7 @@ public class TestClient {
             String pseudo = "GebruikerBestaatAl";
             if (!bestaatAl) {
                 pseudo = Tools.decryptMessage((byte[]) in.readObject(), secretKey);
+                pseudo = pseudo.substring(0,26);
                 System.out.println("Received pseudo: " + pseudo);
 
                 byte[] pseudoCertificateBytes = Tools.decrypt((byte[]) in.readObject(), secretKey);
@@ -81,8 +82,12 @@ public class TestClient {
             short amount = (short) 20;
             ByteBuffer buffer = ByteBuffer.allocate(2);
             buffer.putShort(amount);
-            System.out.println(buffer.array()[0]+" "+buffer.array()[1]);
-            byte[] log = Tools.concatAllBytes(pseudo.getBytes(), buffer.array(), buffer.array()); //stel amount = LP
+            //System.out.println(buffer.array()[0]+" "+buffer.array()[1]);
+            byte[] amountBytes = new byte[2];
+            amountBytes[0] = buffer.array()[0];
+            amountBytes[1] = buffer.array()[1];
+            System.out.println("test: "+pseudo.getBytes().length);
+            byte[] log = Tools.concatAllBytes(pseudo.getBytes(), amountBytes, amountBytes); //stel amount = LP
             System.out.println(log[28] +" "+log[29]);
             logs.add(Tools.encryptMessage(Tools.applyPadding(log), secretKey));
             out.writeObject(logs);

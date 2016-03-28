@@ -124,24 +124,26 @@ public class IOThread extends Thread {
         if (Databank.getInstance().shopContainsUser(shopName, serialNumber)) bestaatAl = true;
         out.writeObject(bestaatAl);
 
-        // psuedoniem genereren
-        String pseudoString = Tools.generateRandomPseudoniem();
-        System.out.println("Generated pseudo: "+pseudoString+" (length: "+pseudoString.length()+")");
-        System.out.println("Pseudo byte array length: "+pseudoString.getBytes().length);
-        Databank.getInstance().addUser(shopName, pseudoString, serialNumber);
-        byte[] pseudo = Tools.encryptMessage(Tools.applyPadding(pseudoString.getBytes()), secretKey);
-        System.out.println("Encrypted pseudo length: "+pseudo.length);
-        out.writeObject(pseudo);
+        if (!bestaatAl) {
+            // psuedoniem genereren
+            String pseudoString = Tools.generateRandomPseudoniem();
+            System.out.println("Generated pseudo: " + pseudoString + " (length: " + pseudoString.length() + ")");
+            System.out.println("Pseudo byte array length: " + pseudoString.getBytes().length);
+            Databank.getInstance().addUser(shopName, pseudoString, serialNumber);
+            byte[] pseudo = Tools.encryptMessage(Tools.applyPadding(pseudoString.getBytes()), secretKey);
+            System.out.println("Encrypted pseudo length: " + pseudo.length);
+            out.writeObject(pseudo);
 
-        // certificaat genereren
-        try {
-            PseudoniemCertificate pseudoCertificate = generatePseudoCertificate(pseudoString);
-            byte[] encryptedCertificate = Tools.encryptMessage(Tools.applyPadding(pseudoCertificate.getBytes()), secretKey);
-            out.writeObject(encryptedCertificate);
-            System.out.println("Certificate size: "+pseudoCertificate.getBytes().length);
-            System.out.println("Encrypted certificate size: "+encryptedCertificate.length);
-        } catch (Exception e) {
-            e.printStackTrace();
+            // certificaat genereren
+            try {
+                PseudoniemCertificate pseudoCertificate = generatePseudoCertificate(pseudoString);
+                byte[] encryptedCertificate = Tools.encryptMessage(Tools.applyPadding(pseudoCertificate.getBytes()), secretKey);
+                out.writeObject(encryptedCertificate);
+                System.out.println("Certificate size: " + pseudoCertificate.getBytes().length);
+                System.out.println("Encrypted certificate size: " + encryptedCertificate.length);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

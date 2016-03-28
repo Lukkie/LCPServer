@@ -99,8 +99,8 @@ public class IOThread extends Thread {
     private void requestRegistration(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
 
         // serial number inlezen
-        byte[] encrpytedSerialNumber = (byte[])in.readObject();
-        byte[] serialNumber = Tools.decrypt(encrpytedSerialNumber, secretKey);
+        byte[] encryptedSerialNumber = (byte[])in.readObject();
+        byte[] serialNumber = Tools.decrypt(encryptedSerialNumber, secretKey);
 
 
         // shopname inlezen

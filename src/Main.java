@@ -1,5 +1,8 @@
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.security.Security;
 
 
 public class Main {
@@ -10,6 +13,7 @@ public class Main {
      * @param args
      */
 	public static void main(String[] args) {
+        Security.addProvider(new BouncyCastleProvider());
         Databank.getInstance();
 		int portNumber = 15151;
         IOThread ioThread = null;

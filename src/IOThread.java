@@ -34,7 +34,6 @@ public class IOThread extends Thread {
         System.out.println("IOThread started");
         this.socket = socket;
         sessionKey = null;
-        Security.addProvider(new BouncyCastleProvider());
 
     }
 	
@@ -53,6 +52,12 @@ public class IOThread extends Thread {
             System.out.println("Stopping run method");
         }
     	catch (IOException e) {
+            try {
+                in.close();
+                out.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
             System.out.println("Connection lost, shutting down thread.");
         } catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -192,18 +197,12 @@ public class IOThread extends Thread {
 
 
         // Lees certificaat van andere partij in, check of juist en lees public key
-        byte[] certificateOtherPartyByteArray = (byte[]) in.readObject();
         X509Certificate certificateOtherParty = null;
-        try {
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            InputStream byteInputStream = new ByteArrayInputStream(certificateOtherPartyByteArray);
-            certificateOtherParty = (X509Certificate)certFactory.generateCertificate(byteInputStream);
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        }
+        certificateOtherParty = Tools.loadCertificate(in, out, false, null);
+
         PublicKey publicKeyOtherParty = certificateOtherParty.getPublicKey();
 
-        sessionKey = generateSessionKey(publicKeyOtherParty.getEncoded());
+        sessionKey = Tools.generateSessionKey(publicKeyOtherParty.getEncoded());
         /*System.out.println("Received W (Public Key other party) (length: "+
                 ecPublicKeyOtherPartyBytes.length+" byte): "+
                 new BigInteger(1, ecPublicKeyOtherPartyBytes).toString(16));*/
@@ -217,33 +216,6 @@ public class IOThread extends Thread {
 
     }
 
-    private byte[] generateSessionKey(byte[] pubKeyOtherPartyBytes) {
-        try {
-            PublicKey pubKeyOtherParty = KeyFactory.getInstance("ECDH", "BC")
-                .generatePublic(new X509EncodedKeySpec(pubKeyOtherPartyBytes));
-            KeyAgreement keyAgr;
-            keyAgr = KeyAgreement.getInstance("ECDH", "BC");
-            keyAgr.init(Tools.getECPrivateKey());
-
-
-            keyAgr.doPhase(pubKeyOtherParty, true);
-            MessageDigest hash = MessageDigest.getInstance("SHA-1");
-            byte[] secret = keyAgr.generateSecret();
-            System.out.print("Secret key (length: "+secret.length+"):\t");
-            Tools.printByteArray(secret);
-            System.out.println();
-            byte[] sessionKey = hash.digest(secret);
-            sessionKey = Arrays.copyOf(sessionKey, 16);
-            System.out.print("Hashed secret key (length: "+sessionKey.length+"):\t");
-            Tools.printByteArray(sessionKey);
-
-            return sessionKey;
-            }
-        catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | NoSuchProviderException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     private void pushLogs(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException {
         ArrayList<byte[]> logsByteArrayEncrypted = (ArrayList<byte[]>)in.readObject();

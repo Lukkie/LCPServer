@@ -13,18 +13,17 @@ import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyAgreement;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.*;
 import java.util.Arrays;
@@ -254,6 +253,49 @@ public class Tools {
         bb.put(input[0]);
         bb.put(input[1]);
         return bb.getShort(0);
+    }
+
+
+    public static X509Certificate loadCertificate(ObjectInputStream in, ObjectOutputStream out, boolean encrypted, SecretKey secretKey) throws IOException, ClassNotFoundException {
+        byte[] certificateByteArray = (byte[]) in.readObject();
+        if (encrypted) certificateByteArray = Arrays.copyOfRange(Tools.decrypt(certificateByteArray, secretKey),0,413);
+        X509Certificate certificate = null;
+        try {
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            InputStream byteInputStream = new ByteArrayInputStream(certificateByteArray);
+            certificate = (X509Certificate)certFactory.generateCertificate(byteInputStream);
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
+        return certificate;
+    }
+
+    public static byte[] generateSessionKey(byte[] pubKeyOtherPartyBytes) {
+        try {
+            PublicKey pubKeyOtherParty = KeyFactory.getInstance("ECDH", "BC")
+                    .generatePublic(new X509EncodedKeySpec(pubKeyOtherPartyBytes));
+            KeyAgreement keyAgr;
+            keyAgr = KeyAgreement.getInstance("ECDH", "BC");
+            keyAgr.init(Tools.getECPrivateKey());
+
+
+            keyAgr.doPhase(pubKeyOtherParty, true);
+            MessageDigest hash = MessageDigest.getInstance("SHA-1");
+            byte[] secret = keyAgr.generateSecret();
+            System.out.print("Secret key (length: "+secret.length+"):\t");
+            Tools.printByteArray(secret);
+            System.out.println();
+            byte[] sessionKey = hash.digest(secret);
+            sessionKey = Arrays.copyOf(sessionKey, 16);
+            System.out.print("Hashed secret key (length: "+sessionKey.length+"):\t");
+            Tools.printByteArray(sessionKey);
+
+            return sessionKey;
+        }
+        catch (NoSuchAlgorithmException | InvalidKeyException | InvalidKeySpecException | NoSuchProviderException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

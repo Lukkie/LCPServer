@@ -3,21 +3,21 @@
  */
 public class Log {
 
-    String pseudo;
+    User pseudo;
     private short amount;
     private short LP;
 
-    public Log(String pseudo, short amount, short LP) {
+    public Log(User pseudo, short amount, short LP) {
         this.pseudo = pseudo;
         this.LP = LP;
         this.amount = amount;
     }
 
-    public String getPseudo() {
+    public User getPseudo() {
         return pseudo;
     }
 
-    public void setPseudo(String pseudo) {
+    public void setPseudo(User pseudo) {
         this.pseudo = pseudo;
     }
 

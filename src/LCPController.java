@@ -24,11 +24,13 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Optional;
 
 public class LCPController {
 
-    private ObservableList<String> logStrings;
+
+    //private ObservableList<String> logStrings;
     private ObservableList<String> certificateStrings;
     private CertificateParser certificateParser;
 
@@ -38,10 +40,12 @@ public class LCPController {
     private Tab certificatesTab;
     @FXML
     private ListView<String> certificatesList;
-    @FXML
-    private ListView<String> logsList;
+    //@FXML
+    //private ListView<String> logsList;
     @FXML
     private TabPane root;
+    @FXML
+    public Accordion accordion;
 
     public LCPController() {
     }
@@ -51,45 +55,60 @@ public class LCPController {
         certificateParser = new CertificateParser();
         certificateParser.parseCertificates();
 
-        logStrings = FXCollections.observableArrayList();
+        //logStrings = FXCollections.observableArrayList();
+        generateLogList();
         generateCertificateList();
 
         certificatesList.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if(event.getButton().equals(MouseButton.PRIMARY)){
-                    if(event.getClickCount() == 2){
+                if (event.getButton().equals(MouseButton.PRIMARY)) {
+                    if (event.getClickCount() == 2) {
                         openCertificate(certificatesList.getSelectionModel().getSelectedIndex());
                     }
                 }
             }
         });
 
-        logsList.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if(event.getButton().equals(MouseButton.PRIMARY)){
-                    if(event.getClickCount() == 2){
-                        openLog(logsList.getSelectionModel().getSelectedIndex());
+
+        //updateLogs();
+    }
+
+    private void generateLogList() {
+        //logStrings = FXCollections.observableArrayList();
+        HashMap<User, ArrayList<Log>> logs = Databank.getInstance().getLogs();
+        ArrayList<TitledPane> panes = new ArrayList<TitledPane>();
+        for (User u : logs.keySet()) {
+            ListView<String> logsList = new ListView<String>();
+
+            ObservableList<String> logStrings = FXCollections.observableArrayList();
+            for (int j = 1; j <= logs.get(u).size(); j++) {
+                logStrings.add("Log #" + j);
+            }
+            logsList.setItems(logStrings);
+
+            logsList.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    if (event.getButton().equals(MouseButton.PRIMARY)) {
+                        if (event.getClickCount() == 2) {
+                            openLog(u, logsList.getSelectionModel().getSelectedIndex());
+                        }
                     }
                 }
-            }
-        });
+            });
 
 
-        updateLogs();
-    }
-    public void updateLogs() {
-        //TODO: lijst van logs uit databank halen, titel aanmaken,
-        //TODO: toevoegen aan logStrings, en mappen met Databank.getInstance().getLog(index)
-
-        logStrings = FXCollections.observableArrayList();
-        for (int j = 1; j <= Databank.getInstance().getLogsSize() ; j++) {
-            logStrings.add("Log #"+j);
+            TitledPane t = new TitledPane(u.getPseudoniem() + " (Shop: " + u.getShop() + ")", logsList);
+            panes.add(t);
         }
+        accordion.getPanes().clear();
+        accordion.getPanes().addAll(panes);
+    }
 
-        logsList.setItems(logStrings);
-        //certificatesList.setItems(certificateStrings);
+    public void updateLogs(String pseudo) {
+        generateLogList();
+
     }
 
 
@@ -100,13 +119,13 @@ public class LCPController {
         certificatesList.setItems(certificateStrings);
     }
 
-    private void openLog(int index) {
-        Log log = Databank.getInstance().getLog(index);
-        boolean added = log.getAmount()>=0;
+    private void openLog(User user, int index) {
+        Log log = Databank.getInstance().getLog(user, index);
+        boolean added = log.getAmount() >= 0;
 
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle("Log");
-        dialog.setHeaderText("Viewing log of "+log.getPseudo());
+        dialog.setHeaderText("Viewing log of " + log.getPseudo().getPseudoniem());
 
         Window window = dialog.getDialogPane().getScene().getWindow();
         window.setOnCloseRequest(event -> window.hide());
@@ -117,12 +136,14 @@ public class LCPController {
         grid.setPadding(new Insets(20, 150, 10, 10));
 
         grid.add(new Label("Pseudo:"), 0, 0);
-        grid.add(new Label(""+log.getPseudo()), 1, 0);
-        grid.add(new Label("Total LP:"), 0, 1);
-        grid.add(new Label(""+log.getLP()), 1, 1);
-        if (added) grid.add(new Label("Amount added:"), 0, 2);
-        else grid.add(new Label("Amount removed:"), 0, 2);
-        grid.add(new Label(""+Math.abs(log.getAmount())), 1, 2);
+        grid.add(new Label("" + log.getPseudo().getPseudoniem()), 1, 0);
+        grid.add(new Label("Shop:"), 0, 1);
+        grid.add(new Label("" + log.getPseudo().getShop()), 1, 1);
+        grid.add(new Label("Total LP:"), 0, 2);
+        grid.add(new Label("" + log.getLP()), 1, 2);
+        if (added) grid.add(new Label("Amount added:"), 0, 3);
+        else grid.add(new Label("Amount removed:"), 0, 3);
+        grid.add(new Label("" + Math.abs(log.getAmount())), 1, 3);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -135,7 +156,7 @@ public class LCPController {
 
         Dialog<Boolean> dialog = new Dialog<>();
         dialog.setTitle("Certificate");
-        dialog.setHeaderText("Certificate menu for subject "+certificateStrings.get(index));
+        dialog.setHeaderText("Certificate menu for subject " + certificateStrings.get(index));
 
         Window window = dialog.getDialogPane().getScene().getWindow();
         window.setOnCloseRequest(event -> window.hide());
@@ -150,7 +171,6 @@ public class LCPController {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
-
 
 
         grid.add(new Label("Subject:"), 0, 0);
@@ -206,7 +226,6 @@ public class LCPController {
         int portNumber = 26262;
 
 
-
         try (
                 Socket socket = new Socket(hostName, portNumber);
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
@@ -231,8 +250,8 @@ public class LCPController {
             SecretKey secretKey2 = new SecretKeySpec(sessionKey2, 0, sessionKey2.length, "AES");
 
             byte[] answer = Tools.decrypt((byte[]) in.readObject(), secretKey2);
-            System.out.println("Answer = "+answer[0]);
-            if (answer[0] == (byte)0x00) return true; // 0x00 als het revoked is
+            System.out.println("Answer = " + answer[0]);
+            if (answer[0] == (byte) 0x00) return true; // 0x00 als het revoked is
             else return false;
 
         } catch (UnknownHostException e) {
@@ -252,7 +271,6 @@ public class LCPController {
     }
 
 
-
     private void revokeCertificate(X509Certificate cert) {
 
         byte[] certificate = new byte[0];
@@ -262,11 +280,10 @@ public class LCPController {
             e.printStackTrace();
         }
 
-        System.out.println("Certificate length: "+certificate.length);
+        System.out.println("Certificate length: " + certificate.length);
 
         String hostName = "localhost";
         int portNumber = 26262;
-
 
 
         try (

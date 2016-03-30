@@ -16,6 +16,9 @@ public class User {
         this.shop = shop;
     }
 
+    public String getShop() {
+        return shop;
+    }
 
     public void setSerialNumber(byte[] serialNumber) {
         this.serialNumber = serialNumber;

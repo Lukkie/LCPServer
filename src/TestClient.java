@@ -78,6 +78,7 @@ public class TestClient {
             }
 
 
+
             /** push logs test **/
             out.writeObject("PushLogs");
             ArrayList<byte[]> logs = new ArrayList<byte[]>();

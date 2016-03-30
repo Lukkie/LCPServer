@@ -1,3 +1,4 @@
+import javafx.application.Platform;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509v1CertificateBuilder;
@@ -237,7 +238,12 @@ public class IOThread extends Thread {
             short LP = Tools.byteArrayToShort(LPBytes);
             Databank.getInstance().addLog(pseudo, amount, LP);
             System.out.printf("Added log: [Pseudo: %s\tamount: %d\tLP:%d]\n",pseudo, amount, LP);
-            controller.updateLogs();
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    controller.updateLogs(pseudo);
+                }
+            });
         }
         //byte[] logsByteArray = Tools.decrypt(logsByteArrayEncrypted, secretKey);
 

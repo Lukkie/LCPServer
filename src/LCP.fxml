@@ -10,7 +10,7 @@
       <content>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <ListView fx:id="logsList" prefHeight="361.0" prefWidth="600.0" />
+                  <Accordion fx:id="accordion" prefHeight="361.0" prefWidth="600.0" />
                </children></AnchorPane>
       </content>
     </Tab>

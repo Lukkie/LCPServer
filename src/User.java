@@ -7,11 +7,13 @@ public class User {
     private byte[] serialNumber;
     private String pseudoniem;
     private int points;
+    private String shop;
 
-    public User(String pseudoniem, byte[] serialNumber) {
+    public User(String pseudoniem, byte[] serialNumber, String shop) {
         this.pseudoniem = pseudoniem;
         this.serialNumber = serialNumber;
         points = 0;
+        this.shop = shop;
     }
 
 

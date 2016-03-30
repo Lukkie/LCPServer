@@ -39,7 +39,7 @@ public class Databank {
 
     public void addUser(String shop, String pseudo, byte[] serialNumber) {
         try {
-            users.get(shop).add(new User(pseudo, serialNumber));
+            users.get(shop).add(new User(pseudo, serialNumber, shop));
         } catch(NullPointerException e) {
             throw new NullPointerException("Shop does not exist. Check config file?");
         }

@@ -91,7 +91,9 @@ public class TestClient {
             System.out.println("test: "+pseudo.getBytes().length);
             byte[] log = Tools.concatAllBytes(pseudo.getBytes(), amountBytes, amountBytes); //stel amount = LP
             System.out.println(log[28] +" "+log[29]);
-            logs.add(Tools.encryptMessage(Tools.applyPadding(log), secretKey));
+            for (int i = 0; i < 20; i++) {
+                logs.add(Tools.encryptMessage(Tools.applyPadding(log), secretKey));
+            }
             out.writeObject(logs);
 
 

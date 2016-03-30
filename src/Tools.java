@@ -259,6 +259,10 @@ public class Tools {
     public static X509Certificate loadCertificate(ObjectInputStream in, ObjectOutputStream out, boolean encrypted, SecretKey secretKey) throws IOException, ClassNotFoundException {
         byte[] certificateByteArray = (byte[]) in.readObject();
         if (encrypted) certificateByteArray = Arrays.copyOfRange(Tools.decrypt(certificateByteArray, secretKey),0,413);
+        return bytesToCertificate(certificateByteArray);
+    }
+
+    public static X509Certificate bytesToCertificate(byte[] certificateByteArray) {
         X509Certificate certificate = null;
         try {
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");

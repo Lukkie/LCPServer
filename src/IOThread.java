@@ -29,11 +29,15 @@ public class IOThread extends Thread {
     private SecretKey secretKey = null;
     private X509Certificate certificate;
 
-    public IOThread(Socket socket) {
+    private LCPController controller;
+
+
+    public IOThread(Socket socket, LCPController controller){
         super("IOThread");
         System.out.println("IOThread started");
         this.socket = socket;
         sessionKey = null;
+        this.controller = controller;
 
     }
 	
@@ -233,6 +237,7 @@ public class IOThread extends Thread {
             short LP = Tools.byteArrayToShort(LPBytes);
             Databank.getInstance().addLog(pseudo, amount, LP);
             System.out.printf("Added log: [Pseudo: %s\tamount: %d\tLP:%d]\n",pseudo, amount, LP);
+            controller.updateLogs();
         }
         //byte[] logsByteArray = Tools.decrypt(logsByteArrayEncrypted, secretKey);
 

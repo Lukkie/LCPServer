@@ -56,4 +56,14 @@ public class Databank {
     public void addLog(String pseudo, short amount, short LP) {
         logs.add(new Log(pseudo, amount, LP));
     }
+
+    public Log getLog(int index) {
+        return logs.get(index);
+    }
+
+     public int getLogsSize() {
+         return logs.size();
+     }
+
+
 }

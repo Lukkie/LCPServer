@@ -5,10 +5,12 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Pair;
 
@@ -120,14 +122,17 @@ public class LCPController {
     }
 
     private void openLog(User user, int index) {
+
         Log log = Databank.getInstance().getLog(user, index);
         boolean added = log.getAmount() >= 0;
 
         Dialog<Pair<String, String>> dialog = new Dialog<>();
         dialog.setTitle("Log");
+
         dialog.setHeaderText("Viewing log of " + log.getPseudo().getPseudoniem());
 
         Window window = dialog.getDialogPane().getScene().getWindow();
+        ((Stage) dialog.getDialogPane().getScene().getWindow()).getIcons().add(new Image("file:log-icon.png"));
         window.setOnCloseRequest(event -> window.hide());
 
         GridPane grid = new GridPane();

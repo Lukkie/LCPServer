@@ -238,6 +238,11 @@ public class Tools {
         return output;
     }
 
+    public static byte[] trimByteArray(byte[] data, int srcOffset, int length) {
+        byte[] trimmedData = new byte[length];
+        System.arraycopy(data,srcOffset, trimmedData, 0,length);
+        return trimmedData;
+    }
     public static String byteArrayToString(byte[] input) {
         try {
             return new String(input, "UTF-8");
